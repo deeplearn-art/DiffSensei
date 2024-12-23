@@ -589,7 +589,7 @@ class MangaPageApp:
         """Launch the Gradio interface"""
         if self.demo is None:
             self.create_ui(pipeline)
-        self.demo.launch()
+        self.demo.launch(share=True)
     
     def generate_panels(self, prompt, pipeline):
         """Generate images for all panels in the current page"""

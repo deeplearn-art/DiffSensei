@@ -643,7 +643,7 @@ class MangaPageApp:
         """Launch the Gradio interface"""
         if self.demo is None:
             self.create_ui(pipeline, tokenizer_mllm, agent_model)
-        self.demo.launch()
+        self.demo.launch(share=True)
     
     def generate_panels(self, prompt, pipeline, tokenizer_mllm, agent_model):
         """Generate images for all panels in the current page"""
