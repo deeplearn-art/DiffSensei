@@ -103,10 +103,12 @@ class MangaPageApp:
         self.demo = None
         self.char_map = {}  # Add char_map as class member
         self.reverse_char_map = {}
-    
-    def init_page(self, ip_images=None):
+        self.prompt=None
+        
+    def init_page(self, ip_images=None, prompt=None):
         """Initialize or reset the page and character map"""
         self.current_page = Page(len(ip_images))
+        self.prompt = prompt
         self.char_map = {i: path for i, path in enumerate(ip_images)} if ip_images else {}
         self.reverse_char_map = {path: i for i, path in self.char_map.items()}  # Create reverse mapping
     #canvas init
@@ -205,8 +207,10 @@ class MangaPageApp:
             
             # Split prompt into individual panel prompts
             panel_prompts = []
-            if prompt:
+            print(f"Received prompt type: {type(prompt)}, value: {prompt}")  # Debug print
+            if prompt and isinstance(prompt, str):
                 panel_prompts = [p.strip() for p in prompt.split('\n') if p.strip()]
+                print(f"Processed prompts: {panel_prompts}")
             
             # Process panel boundaries
             if panel_canvas is not None:
@@ -421,7 +425,7 @@ class MangaPageApp:
                 print(f"\nPANEL {panel_idx}")
                 print("-"*20)
                 print(f"Coordinates: ({panel.coords[0]:.1f}, {panel.coords[1]:.1f}) -> ({panel.coords[2]:.1f}, {panel.coords[3]:.1f})")
-                
+                print(f"\nPrompt: {panel.prompt}")
                 print("\nCharacter boxes:")
                 if not panel.ip_images:
                     print("  None")
@@ -503,17 +507,19 @@ class MangaPageApp:
                 with gr.Column(scale=1):
                     pass
 
-            # Event handlers with debug prints
+                        
+             # Event handlers with debug prints
             ip_images.change(
-                fn=lambda imgs: (
+                fn=lambda imgs, prompt: (
                     #self.create_character_selector(imgs),
-                    self.init_page(imgs if imgs else None),
+                    self.init_page(imgs if imgs else None, prompt),
                     self.debug_state(),
                     self.create_character_selector(imgs)  # Return value for UI
                 )[-1],
-                inputs=[ip_images],
+                inputs=[ip_images,prompt],
                 outputs=[char_selector]
             )
+
             
             finish_panels_btn.click(
                 fn=lambda canvas, imgs: (
