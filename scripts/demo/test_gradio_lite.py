@@ -509,12 +509,11 @@ class MangaPageApp:
              # Event handlers with debug prints
             ip_images.change(
                 fn=lambda imgs, prompt: (
-                    #self.create_character_selector(imgs),
                     self.init_page(imgs if imgs else None, prompt),
                     self.debug_state(),
                     self.create_character_selector(imgs)  # Return value for UI
                 )[-1],
-                inputs=[ip_images,prompt],
+                inputs=[ip_images, prompt],
                 outputs=[char_selector]
             )
 
@@ -535,17 +534,16 @@ class MangaPageApp:
                     self.debug_state(),
                     self.draw_box_with_character(canvas)
                 )[-1],
-                inputs=[char_canvas, char_selector, panel_canvas, ip_images],
+                inputs=[char_canvas, char_selector, ip_images],
                 outputs=[char_canvas]
             )
             
             finish_chars_btn.click(
                 fn=lambda panels, chars: (
-                   
                     self.debug_state(),
                     self.copy_canvas_with_boxes({
                         "image": panels["image"],
-                        "points": panels["points"] + chars["points"]  # Combine panel and character boxes
+                        "points": panels["points"] + chars["points"]
                     }, store_points=False)
                 )[-1],
                 inputs=[panel_canvas, char_canvas],
