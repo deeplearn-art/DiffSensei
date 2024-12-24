@@ -207,11 +207,8 @@ class MangaPageApp:
             
             # Split prompt into individual panel prompts
             panel_prompts = []
-            print(f"Received prompt type: {type(prompt)}, value: {prompt}")  # Debug print
-            if prompt and isinstance(prompt, str):
-                panel_prompts = [p.strip() for p in prompt.split('\n') if p.strip()]
-                print(f"Processed prompts: {panel_prompts}")
-            
+            if self.prompt:
+                panel_prompts = [p.strip() for p in self.prompt.split('\n') if p.strip()]
             # Process panel boundaries
             if panel_canvas is not None:
                 # Get all panel boxes
@@ -459,10 +456,11 @@ class MangaPageApp:
                         5. Generate page
                         """)
                         
-                        prompt = gr.Textbox(label="Prompt", lines=1, value="Test prompt")
+                        prompt = gr.Textbox(label="Prompt", lines=1, value="Test prompt", interactive=True)
                         ip_images = gr.File(
                             label="Upload Character Images (max 4)", 
                             file_count="multiple", 
+
                             type="filepath"
                         )
                         
