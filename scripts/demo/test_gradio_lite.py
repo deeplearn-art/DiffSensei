@@ -195,7 +195,7 @@ class MangaPageApp:
         return (self.point_in_panel((bx1, by1), panel_coords) and 
                 self.point_in_panel((bx2, by2), panel_coords))
     
-    def process_panel_boxes(self, panel_canvas, char_canvas, dialog_canvas, prompt=None, ip_images=None, current_char_idx=None):
+    def process_panel_boxes(self, panel_canvas, char_canvas, dialog_canvas, ip_images=None, current_char_idx=None):
         """Process all canvases into a Page object"""
         try:
             if self.current_page is None:
@@ -530,7 +530,7 @@ class MangaPageApp:
             )
             
             draw_char_box_btn.click(
-                fn=lambda canvas, char_sel, panels, imgs: (
+                fn=lambda canvas, char_sel, imgs: (
                     self.process_panel_boxes(None, canvas, None, imgs, self.get_char_idx_from_selector(char_sel)),
                     self.debug_state(),
                     self.draw_box_with_character(canvas)

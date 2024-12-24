@@ -252,7 +252,7 @@ class MangaPageApp:
         return (self.point_in_panel((bx1, by1), panel_coords) and 
                 self.point_in_panel((bx2, by2), panel_coords))
     
-    def process_panel_boxes(self, panel_canvas, char_canvas, dialog_canvas, prompt=None, ip_images=None, current_char_idx=None):
+    def process_panel_boxes(self, panel_canvas, char_canvas, dialog_canvas, ip_images=None, current_char_idx=None):
         """Process all canvases into a Page object"""
         try:
             if self.current_page is None:
@@ -264,7 +264,7 @@ class MangaPageApp:
             
             # Split prompt into individual panel prompts
             panel_prompts = []
-            if prompt:
+            if self.prompt:
                 panel_prompts = [p.strip() for p in self.prompt.split('\n') if p.strip()]
             
             # Process panel boundaries
