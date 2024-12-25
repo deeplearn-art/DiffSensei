@@ -584,12 +584,12 @@ class MangaPageApp:
             )
             
             draw_char_box_btn.click(
-                fn=lambda canvas, char_sel, panels, imgs: (
+                fn=lambda canvas, char_sel, imgs: (
                     self.process_panel_boxes(None, canvas, None, imgs, self.get_char_idx_from_selector(char_sel)),
                     self.debug_state(),
                     self.draw_box_with_character(canvas)
                 )[-1],
-                inputs=[char_canvas, char_selector, panel_canvas, ip_images],
+                inputs=[char_canvas, char_selector, ip_images],
                 outputs=[char_canvas]
             )
             
@@ -674,10 +674,15 @@ class MangaPageApp:
             height = int(y2 - y1)
             
             # Process character boxes and images for this panel
-            ip_images = panel.ip_images
-            ip_bbox = panel.ip_bbox  # Already normalized
-            dialog_bbox = panel.dialog_bbox  # Already normalized
-            
+            loaded_images = []
+            if panel.ip_images:
+                for img_path in panel.ip_images:
+                    try:
+                        img = Image.open(img_path).convert('RGB')
+                        loaded_images.append(img)
+                    except Exception as e:
+                        print(f"Error loading image {img_path}: {e}")
+                        loaded_images.append(Image.new('RGB', (224, 224), (0, 0, 0)))  # Black placeholder
             try:
                 # Call the generation function
                 results = result_generation(
@@ -689,9 +694,9 @@ class MangaPageApp:
                     width=width,
                     num_samples=num_samples,
                     seed=seed,
-                    ip_images=ip_images,
-                    ip_bbox=ip_bbox,
-                    dialog_bbox=dialog_bbox,
+                    ip_images=loaded_images,  # Pass loaded PIL images instead of paths
+                    ip_bbox=panel.ip_bbox,  # Already normalized
+                    dialog_bbox=panel.dialog_bbox,  # Already normalized
                     num_inference_steps=num_inference_steps,
                     guidance_scale=guidance_scale,
                     negative_prompt=negative_prompt,
@@ -708,7 +713,10 @@ class MangaPageApp:
             except Exception as e:
                 print(f"Error generating panel {i+1}: {str(e)}")
                 continue
-        
+                        
+            # Clean up loaded images
+            for img in loaded_images:
+                img.close()
         return generated_images
 
 def load_models(args):
