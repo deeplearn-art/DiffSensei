@@ -251,7 +251,7 @@ def generate_panels_from_json(json_path, output_dir,pipeline, tokenizer_mllm=Non
         # Get panel dimensions
         panel_width = panel["box"]["width"]
         panel_height = panel["box"]["height"]
-        
+        prompt = panel["description"]
         # Process character boxes and images
         ip_images = []
         ip_bbox = []
@@ -297,12 +297,26 @@ def generate_panels_from_json(json_path, output_dir,pipeline, tokenizer_mllm=Non
                 dialog_y + dialog_h
             ])
         try:
-            # Generate image for this panel
-            if tokenizer_mllm and agent_model:
-                results = result_generation(...)  # Same as before
-            else:
-                results = result_generation(...)  # Same as before
-            
+           # Call the generation function
+            results = result_generation(
+                pipeline=pipeline,
+                tokenizer_mllm=tokenizer_mllm,
+                agent_model=agent_model,
+                prompt=prompt,  
+                height=panel_height,
+                width=panel_width,
+                num_samples=num_samples,
+                seed=seed,
+                ip_images=ip_images,  # Pass loaded PIL images instead of paths
+                ip_bbox=panel.ip_bbox,  # Already normalized
+                dialog_bbox=panel.dialog_bbox,  # Already normalized
+                num_inference_steps=num_inference_steps,
+                guidance_scale=guidance_scale,
+                negative_prompt=negative_prompt,
+                ip_scale=ip_scale,
+                mllm_scale=mllm_scale
+            )
+                
             if results:
                 # Save each generated image
                 for img_idx, img in enumerate(results):
