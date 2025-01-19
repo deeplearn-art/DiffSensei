@@ -3,13 +3,27 @@ import base64
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
-
+from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 from io import BytesIO
 from scripts.demo.test_json import main
 import sys
 
 app = FastAPI()
+
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins, or specify a list of allowed origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
+
+@app.get("/")
+def read_root():
+    return {"message": "Hello, World!"}
 
 # Configure the model with command line arguments
 sys.argv = [
