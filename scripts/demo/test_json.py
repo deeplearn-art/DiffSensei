@@ -217,7 +217,7 @@ def load_models(args):
 
     return pipeline, tokenizer_mllm, agent_model
 
-def generate_panels_from_json(json_path, output_dir,pipeline, tokenizer_mllm=None, agent_model=None):
+def generate_panels_from_json(data, output_dir,pipeline, tokenizer_mllm=None, agent_model=None):
     """Generate panels from JSON specification file and save them"""
     import json
     import os
@@ -241,8 +241,8 @@ def generate_panels_from_json(json_path, output_dir,pipeline, tokenizer_mllm=Non
     mllm_scale = 0.3
     
     # Load JSON data
-    with open(json_path, 'r') as f:
-        data = json.load(f)
+    #with open(json_path, 'r') as f:
+    #    data = json.load(f)
     
     generated_images = []
     
@@ -351,7 +351,7 @@ def generate_panels_from_json(json_path, output_dir,pipeline, tokenizer_mllm=Non
             "ip_scale": ip_scale,
             "mllm_scale": mllm_scale if tokenizer_mllm else None
         },
-        "input_json": json_path
+        "input_json": data
     }
     
     with open(os.path.join(run_dir, "metadata.json"), 'w') as f:
@@ -366,18 +366,17 @@ def main():
     parser.add_argument("--inference_config_path", type=str, required=True)
     parser.add_argument("--ckpt_path", type=str, required=True)
     parser.add_argument("--bit_8",action="store_true")
-    parser.add_argument("--json", type=str, required=True) #path to json
-    parser.add_argument("--output_dir", type=str, required=True) #path to json
+    parser.add_argument("--output_dir", type=str, required=True)
     args = parser.parse_args()
     
     # Load models and pipeline
     pipeline, tokenizer_mllm, agent_model = load_models(args)
-    generate_panels_from_json(args.json, args.output_dir,pipeline,tokenizer_mllm,agent_model)
-
-
     
+    # Instead of reading JSON from file, the function now expects the JSON data directly
+    def process_json_data(json_data, output_dir):
+        return generate_panels_from_json(json_data, output_dir, pipeline, tokenizer_mllm, agent_model)
     
-    
+    return process_json_data  # Return the function to be used by FastAPI
 
 if __name__ == "__main__":
     main()
