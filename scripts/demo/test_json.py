@@ -351,7 +351,7 @@ def generate_panels_from_json(data, output_dir,pipeline, tokenizer_mllm=None, ag
             "ip_scale": ip_scale,
             "mllm_scale": mllm_scale if tokenizer_mllm else None
         },
-        "input_json": data
+        "input_json": json_path
     }
     
     with open(os.path.join(run_dir, "metadata.json"), 'w') as f:

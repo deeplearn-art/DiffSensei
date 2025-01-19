@@ -9,3 +9,6 @@ yacs
 gradio
 peft
 sentencepiece
+fastapi
+
+

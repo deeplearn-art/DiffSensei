@@ -285,13 +285,13 @@ def main(args):
     print(f"All models and pipelines load complete")
 
     # Custom function to generate the blank image dict
-    def generate_blank_image_dict_and_run(*args):
-        (
-            prompt, height, width, num_samples, seed, ip_images,
-            ip_bbox, dialog_bbox, num_inference_steps, guidance_scale,
-            negative_prompt, ip_scale, mllm_scale
-        ) = args
-
+    def generate_blank_image_dict_and_run(
+        prompt, height, width, num_samples, seed, ip_images,
+        ip_bbox, dialog_bbox, num_inference_steps, guidance_scale,
+        negative_prompt, ip_scale, mllm_scale,
+        pipeline, tokenizer_mllm, agent_model
+    ):
+        """Generate images with the given parameters"""
         canvas_height, canvas_width = calculate_canvas_size(width, height)
 
         return result_generation(
@@ -304,8 +304,8 @@ def main(args):
             num_samples=num_samples,
             seed=seed,
             ip_images=load_images(ip_images) if ip_images else [],
-            ip_bbox=process_bounding_boxes(ip_bbox, canvas_width, canvas_height) if ip_bbox else [],
-            dialog_bbox=process_bounding_boxes(dialog_bbox, canvas_width, canvas_height) if dialog_bbox else [],
+            ip_bbox=ip_bbox,  # Already normalized
+            dialog_bbox=dialog_bbox,  # Already normalized
             num_inference_steps=num_inference_steps,
             guidance_scale=guidance_scale,
             negative_prompt=negative_prompt,
@@ -363,7 +363,8 @@ def main(args):
             inputs=[
                 prompt, height, width, num_samples, seed, ip_images,
                 ip_bbox, dialog_bbox, num_inference_steps, guidance_scale,
-                negative_prompt, ip_scale, mllm_scale
+                negative_prompt, ip_scale, mllm_scale,
+                pipeline, tokenizer_mllm, agent_model
             ],
             outputs=generated_images,
         )
