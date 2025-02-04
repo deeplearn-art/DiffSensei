@@ -1,6 +1,7 @@
 import os
 os.environ["GRADIO_ANALYTICS_ENABLED"] = "False"
-
+import requests
+from io import BytesIO
 import torch
 import argparse
 from PIL import Image, ImageDraw
@@ -258,8 +259,15 @@ def generate_panels_from_json(json_path, output_dir,pipeline, tokenizer_mllm=Non
         
         for char in panel.get("characters", []):
             try:
-                # Load character image
-                img = Image.open(char["path"]).convert('RGB')
+                # Load character image from path or URL
+                if char["path"].startswith(('http://', 'https://')):
+                    # Handle URL
+                    response = requests.get(char["path"])
+                    img = Image.open(BytesIO(response.content)).convert('RGB')
+                else:
+                    # Handle local file
+                    img = Image.open(char["path"]).convert('RGB')
+                
                 ip_images.append(img)
                 
                 # Convert character box to normalized coordinates
