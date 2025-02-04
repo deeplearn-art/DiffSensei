@@ -218,7 +218,7 @@ def load_models(args):
 
     return pipeline, tokenizer_mllm, agent_model
 
-def generate_panels_from_json(json_path, output_dir,pipeline, tokenizer_mllm=None, agent_model=None):
+def generate_panels_from_json(json_path, output_dir,pipeline, tokenizer_mllm=None, agent_model=None, downscale=False):
     """Generate panels from JSON specification file and save them"""
     import json
     import os
@@ -252,6 +252,9 @@ def generate_panels_from_json(json_path, output_dir,pipeline, tokenizer_mllm=Non
         # Get panel dimensions
         panel_width = panel["box"]["width"]
         panel_height = panel["box"]["height"]
+        if downscale:
+            panel_width = panel_width // 2
+            panel_height = panel_height // 2
         prompt = panel["description"]
         # Process character boxes and images
         ip_images = []
@@ -269,19 +272,30 @@ def generate_panels_from_json(json_path, output_dir,pipeline, tokenizer_mllm=Non
                     img = Image.open(char["path"]).convert('RGB')
                 
                 ip_images.append(img)
+
+                char_x = char["box"]["x"] 
+                char_y = char["box"]["y"]
+                char_w = char["box"]["width"] 
+                char_h = char["box"]["height"] 
+
+                if downscale:
+                    char_x = char_x // 2
+                    char_y = char_y // 2
+                    char_w = char_w // 2
+                    char_h = char_h // 2
                 
                 # Convert character box to normalized coordinates
-                char_x = char["box"]["x"] / panel_width
-                char_y = char["box"]["y"] / panel_height
-                char_w = char["box"]["width"] / panel_width
-                char_h = char["box"]["height"] / panel_height
+                char_x_norm = char_x / panel_width
+                char_y_norm = char_y / panel_height
+                char_w_norm = char_w / panel_width
+                char_h_norm = char_h / panel_height
                 
                 # Store as [x1, y1, x2, y2] format
                 ip_bbox.append([
-                    char_x,
-                    char_y,
-                    char_x + char_w,
-                    char_y + char_h
+                    char_x_norm,
+                    char_y_norm,
+                    char_x_norm + char_w_norm,
+                    char_y_norm + char_h_norm
                 ])
                 
             except Exception as e:
@@ -291,18 +305,29 @@ def generate_panels_from_json(json_path, output_dir,pipeline, tokenizer_mllm=Non
         # Process dialog boxes
         dialog_bbox = []
         for dialog in panel.get("dialog", []):
-            # Convert dialog box to normalized coordinates
-            dialog_x = dialog["box"]["x"] / panel_width
-            dialog_y = dialog["box"]["y"] / panel_height
-            dialog_w = dialog["box"]["width"] / panel_width
-            dialog_h = dialog["box"]["height"] / panel_height
+            # Convert dialog box to nor malized coordinates
+            dialog_x = dialog["box"]["x"] 
+            dialog_y = dialog["box"]["y"] 
+            dialog_w = dialog["box"]["width"] 
+            dialog_h = dialog["box"]["height"]
+            
+            if downscale:
+                dialog_x = dialog_x // 2
+                dialog_y = dialog_y // 2
+                dialog_w = dialog_w // 2
+                dialog_h = dialog_h // 2
+            
+            dialog_x_norm = dialog_x / panel_width
+            dialog_y_norm = dialog_y / panel_height
+            dialog_w_norm = dialog_w / panel_width
+            dialog_h_norm = dialog_h / panel_height
             
             # Store as [x1, y1, x2, y2] format
             dialog_bbox.append([
-                dialog_x,
-                dialog_y,
-                dialog_x + dialog_w,
-                dialog_y + dialog_h
+                dialog_x_norm,
+                dialog_y_norm,
+                dialog_x_norm + dialog_w_norm,
+                dialog_y_norm + dialog_h_norm
             ])
         try:
            # Call the generation function
@@ -322,8 +347,18 @@ def generate_panels_from_json(json_path, output_dir,pipeline, tokenizer_mllm=Non
                 guidance_scale=guidance_scale,
                 negative_prompt=negative_prompt,
                 ip_scale=ip_scale,
-                mllm_scale=mllm_scale
+                mllm_scale=mllm_scale,
             )
+                
+            if results and downscale:
+                # Upscale each generated image by 200%
+                upscaled_results = []
+                for img in results:
+                    new_width = img.width * 2
+                    new_height = img.height * 2
+                    upscaled_img = img.resize((new_width, new_height), Image.Resampling.LANCZOS)
+                    upscaled_results.append(upscaled_img)
+                results = upscaled_results
                 
             if results:
                 # Save each generated image
@@ -374,13 +409,14 @@ def main():
     parser.add_argument("--inference_config_path", type=str, required=True)
     parser.add_argument("--ckpt_path", type=str, required=True)
     parser.add_argument("--bit_8",action="store_true")
+    parser.add_argument("--downscale",action="store_true")
     parser.add_argument("--json", type=str, required=True) #path to json
     parser.add_argument("--output_dir", type=str, required=True) #path to json
     args = parser.parse_args()
     
     # Load models and pipeline
     pipeline, tokenizer_mllm, agent_model = load_models(args)
-    generate_panels_from_json(args.json, args.output_dir,pipeline,tokenizer_mllm,agent_model)
+    generate_panels_from_json(args.json, args.output_dir,pipeline,tokenizer_mllm,agent_model, args.downscale)
 
 
     
