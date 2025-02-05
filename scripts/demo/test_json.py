@@ -411,7 +411,12 @@ def main():
     parser.add_argument("--downscale",action="store_true")
     parser.add_argument("--json", type=str, required=True) #path to json
     parser.add_argument("--output_dir", type=str, required=True) #path to json
+    parser.add_argument("--seed", type=int, default=None)
     args = parser.parse_args()
+
+    if args.seed is None:
+        args.seed = np.random.randint(0, 100000000)
+    print(f"Using seed: {args.seed}")
     
     # Load models and pipeline
     pipeline, tokenizer_mllm, agent_model = load_models(args)
