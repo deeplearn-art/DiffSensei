@@ -217,7 +217,7 @@ def load_models(args):
 
     return pipeline, tokenizer_mllm, agent_model
 
-def generate_panels_from_json(json_path, output_dir,pipeline, tokenizer_mllm=None, agent_model=None, downscale=False):
+def generate_panels_from_json(json_path, seed, output_dir,pipeline, tokenizer_mllm=None, agent_model=None, downscale=False):
     """Generate panels from JSON specification file and save them"""
     import json
     import os
@@ -233,7 +233,6 @@ def generate_panels_from_json(json_path, output_dir,pipeline, tokenizer_mllm=Non
     
     # Default generation parameters
     num_samples = 1
-    seed = 0
     num_inference_steps = 30
     guidance_scale = 7.5
     negative_prompt = ""
@@ -420,7 +419,7 @@ def main():
     
     # Load models and pipeline
     pipeline, tokenizer_mllm, agent_model = load_models(args)
-    generate_panels_from_json(args.json, args.output_dir,pipeline,tokenizer_mllm,agent_model, args.downscale)
+    generate_panels_from_json(args.json, args.seed, args.output_dir,pipeline,tokenizer_mllm,agent_model, args.downscale)
 
 
     
