@@ -185,11 +185,9 @@ def load_models(args):
     )
     image_proj_model.load_state_dict(checkpoint)
 
-    # Load MLLM components
-    llm_path = f"llm{suffix}"
-    print(f"llm_path: {llm_path}")
+   
     tokenizer_mllm = LlamaTokenizer.from_pretrained(os.path.join(args.ckpt_path, "mllm", "tokenizer"))
-    llm_model = LlamaForCausalLM.from_pretrained(os.path.join(args.ckpt_path, "mllm", llm_path), torch_dtype=weight_dtype)
+    llm_model = LlamaForCausalLM.from_pretrained(os.path.join(args.ckpt_path, "mllm", "llm"), torch_dtype=weight_dtype)
     
     input_resampler = QwenResampler(**config.agent.input_resampler)
     output_resampler = QwenResampler(**config.agent.output_resampler)
@@ -215,6 +213,7 @@ def load_models(args):
         magi_image_encoder=magi_image_encoder,
     )
     pipeline.to(device='cuda:0', dtype=weight_dtype)
+    pipeline.enable_model_cpu_offload()
 
     return pipeline, tokenizer_mllm, agent_model
 
