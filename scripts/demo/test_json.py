@@ -217,8 +217,19 @@ def load_models(args):
 
     return pipeline, tokenizer_mllm, agent_model
 
-def generate_panels_from_json(json_path, seed, output_dir,pipeline, tokenizer_mllm=None, agent_model=None, downscale=False):
+def generate_panels_from_json(json_path, output_dir, pipeline, tokenizer_mllm=None, agent_model=None, downscale=False, seed=0):
     """Generate panels from JSON specification file and save them"""
+    # Load inference config
+    inference_config = OmegaConf.load(args.inference_config_path)
+    
+    # Use parameters from config
+    num_samples = inference_config.get('num_samples', 1)
+    num_inference_steps = inference_config.get('num_inference_steps', 30)
+    guidance_scale = inference_config.get('guidance_scale', 7.5)
+    negative_prompt = inference_config.get('negative_prompt', "")
+    ip_scale = inference_config.get('ip_scale', 0.7)
+    mllm_scale = inference_config.get('mllm_scale', 0.3)
+    
     import json
     import os
     from datetime import datetime
@@ -231,20 +242,13 @@ def generate_panels_from_json(json_path, seed, output_dir,pipeline, tokenizer_ml
     run_dir = os.path.join(output_dir, f"generation_{timestamp}")
     os.makedirs(run_dir, exist_ok=True)
     
-    # Default generation parameters
-    num_samples = 1
-    num_inference_steps = 30
-    guidance_scale = 7.5
-    negative_prompt = ""
-    ip_scale = 0.7
-    mllm_scale = 0.3
-    
     # Load JSON data
     with open(json_path, 'r') as f:
         data = json.load(f)
     
     generated_images = []
     
+    negative_prompt += data["negative"]
     for panel_idx, panel in enumerate(data["panels"]):
         print(f"\nProcessing panel: {panel['guid']}")
         # Get panel dimensions
@@ -419,7 +423,7 @@ def main():
     
     # Load models and pipeline
     pipeline, tokenizer_mllm, agent_model = load_models(args)
-    generate_panels_from_json(args.json, args.seed, args.output_dir,pipeline,tokenizer_mllm,agent_model, args.downscale)
+    generate_panels_from_json(args.json, args.output_dir, pipeline, tokenizer_mllm, agent_model, args.downscale, args.seed)
 
 
     

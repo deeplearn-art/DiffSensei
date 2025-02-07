@@ -1,6 +1,6 @@
 num_inference_steps: 30
 guidance_scale: 7.5
-negative_prompt: "think lines, pure black background, colored, lowres, bad anatomy, worst quality, low quality"
+negative_prompt: "thin lines, pure black background, colored, lowres, bad anatomy, worst quality, low quality"
 num_samples: 1
 ip_scale: 0.6
 mllm_scale: 0.4
