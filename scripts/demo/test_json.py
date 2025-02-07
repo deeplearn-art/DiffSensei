@@ -217,10 +217,10 @@ def load_models(args):
 
     return pipeline, tokenizer_mllm, agent_model
 
-def generate_panels_from_json(json_path, output_dir, pipeline, tokenizer_mllm=None, agent_model=None, downscale=False, seed=0):
+def generate_panels_from_json(json_path, output_dir, inference_config_path, pipeline, tokenizer_mllm=None, agent_model=None, downscale=False, seed=0):
     """Generate panels from JSON specification file and save them"""
     # Load inference config
-    inference_config = OmegaConf.load(args.inference_config_path)
+    inference_config = OmegaConf.load(inference_config_path)
     
     # Use parameters from config
     num_samples = inference_config.get('num_samples', 1)
@@ -423,7 +423,7 @@ def main():
     
     # Load models and pipeline
     pipeline, tokenizer_mllm, agent_model = load_models(args)
-    generate_panels_from_json(args.json, args.output_dir, pipeline, tokenizer_mllm, agent_model, args.downscale, args.seed)
+    generate_panels_from_json(args.json, args.output_dir, args.inference_config_path, pipeline, tokenizer_mllm, agent_model, args.downscale, args.seed)
 
 
     
