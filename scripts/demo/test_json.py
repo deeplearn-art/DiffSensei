@@ -248,7 +248,6 @@ def generate_panels_from_json(json_path, output_dir, inference_config_path, pipe
     
     generated_images = []
     
-    negative_prompt += data["negative"]
     for panel_idx, panel in enumerate(data["panels"]):
         print(f"\nProcessing panel: {panel['guid']}")
         # Get panel dimensions
@@ -258,6 +257,7 @@ def generate_panels_from_json(json_path, output_dir, inference_config_path, pipe
             panel_width = panel_width // 2
             panel_height = panel_height // 2
         prompt = panel["description"]
+        negative_prompt += panel["negative"]
         # Process character boxes and images
         ip_images = []
         ip_bbox = []
