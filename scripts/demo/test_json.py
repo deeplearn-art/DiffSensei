@@ -257,7 +257,8 @@ def generate_panels_from_json(json_path, output_dir, inference_config_path, pipe
             panel_width = panel_width // 2
             panel_height = panel_height // 2
         prompt = panel["description"]
-        negative_prompt += panel["negative"]
+        negative_prompt += panel["negative"] if panel["negative"] != "!" else ""
+        print(f"Negative prompt: {negative_prompt}")
         # Process character boxes and images
         ip_images = []
         ip_bbox = []
