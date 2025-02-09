@@ -102,7 +102,7 @@ def result_generation(
 
     img_gen_feat = output['img_gen_feat'].view(pipeline.unet.config.max_num_ips, pipeline.unet.config.num_vision_tokens, -1)
     img_gen_feat = img_gen_feat * mllm_scale + image_embeds.view(pipeline.unet.config.max_num_ips, pipeline.unet.config.num_vision_tokens, -1) * (1 - mllm_scale)
-
+    print(f"Negative prompt: {negative_prompt}")
     try:
         images = pipeline(
             prompt=prompt,
@@ -257,8 +257,11 @@ def generate_panels_from_json(json_path, output_dir, inference_config_path, pipe
             panel_width = panel_width // 2
             panel_height = panel_height // 2
         prompt = panel["description"]
-        negative_prompt += panel["negative"] if panel["negative"] != "!" else ""
-        print(f"Negative prompt: {negative_prompt}")
+        if panel["negative"] == "!":
+            negative_prompt = ""
+        else:
+            negative_prompt = f'{negative_prompt} {panel["negative"]}'
+        
         # Process character boxes and images
         ip_images = []
         ip_bbox = []
